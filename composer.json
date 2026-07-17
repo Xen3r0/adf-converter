@@ -1,0 +1,38 @@
+{
+    "name": "xen3r0/adf-converter",
+    "description": "A PHP toolkit to parse the Atlassian Document Format (ADF) and export it to HTML or Markdown",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["atlassian", "adf", "jira", "confluence", "html", "markdown"],
+    "autoload": {
+        "psr-4": {
+            "Xen3r0\\Adf\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Xen3r0\\Adf\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Manuel Santisteban",
+            "email": "xen3r0@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "ext-dom": "*",
+        "ext-json": "*",
+        "league/commonmark": "^2.4"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.85",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^10.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
