@@ -6,6 +6,7 @@ namespace Xen3r0\Adf\Exporter\Html;
 
 use Xen3r0\Adf\Exception\UnsupportedExportFormatException;
 use Xen3r0\Adf\Exporter\ExporterInterface;
+use Xen3r0\Adf\Exporter\SanitizesUrls;
 use Xen3r0\Adf\Node\Block\Blockquote;
 use Xen3r0\Adf\Node\Block\BulletList;
 use Xen3r0\Adf\Node\Block\CodeBlock;
@@ -46,6 +47,8 @@ use Xen3r0\Adf\Node\Node;
 
 final class HtmlExporter implements ExporterInterface
 {
+    use SanitizesUrls;
+
     public function export(Node $node): string
     {
         return match (true) {
@@ -148,7 +151,7 @@ final class HtmlExporter implements ExporterInterface
     {
         $url = $node->getUrl() ?? (string) ($node->getData()['url'] ?? '');
 
-        return \sprintf('<a href="%1$s">%1$s</a>', htmlspecialchars($url));
+        return \sprintf('<a href="%1$s">%2$s</a>', htmlspecialchars($this->sanitizeUrl($url)), htmlspecialchars($url));
     }
 
     private function renderText(Text $node): string
@@ -171,7 +174,7 @@ final class HtmlExporter implements ExporterInterface
             $mark instanceof Link => $this->wrapLink($mark, $text),
             $mark instanceof Strike => "<del>{$text}</del>",
             $mark instanceof Strong => "<strong>{$text}</strong>",
-            $mark instanceof Subsup => \sprintf('<%1$s>%2$s</%1$s>', $mark->getSubsupType(), $text),
+            $mark instanceof Subsup => \sprintf('<%1$s>%2$s</%1$s>', 'sup' === $mark->getSubsupType() ? 'sup' : 'sub', $text),
             $mark instanceof TextColor => \sprintf('<span style="color:%s">%s</span>', htmlspecialchars($mark->getColor()), $text),
             $mark instanceof Underline => "<u>{$text}</u>",
             default => throw new UnsupportedExportFormatException($mark::class),
@@ -182,6 +185,6 @@ final class HtmlExporter implements ExporterInterface
     {
         $title = null !== $mark->getTitle() ? \sprintf(' title="%s"', htmlspecialchars($mark->getTitle())) : '';
 
-        return \sprintf('<a href="%s"%s>%s</a>', htmlspecialchars($mark->getHref()), $title, $text);
+        return \sprintf('<a href="%s"%s>%s</a>', htmlspecialchars($this->sanitizeUrl($mark->getHref())), $title, $text);
     }
 }

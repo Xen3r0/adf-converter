@@ -6,6 +6,7 @@ namespace Xen3r0\Adf\Exporter\Markdown;
 
 use Xen3r0\Adf\Exception\UnsupportedExportFormatException;
 use Xen3r0\Adf\Exporter\ExporterInterface;
+use Xen3r0\Adf\Exporter\SanitizesUrls;
 use Xen3r0\Adf\Node\Block\Blockquote;
 use Xen3r0\Adf\Node\Block\BulletList;
 use Xen3r0\Adf\Node\Block\CodeBlock;
@@ -46,6 +47,8 @@ use Xen3r0\Adf\Node\Node;
 
 final class MarkdownExporter implements ExporterInterface
 {
+    use SanitizesUrls;
+
     public function export(Node $node): string
     {
         $content = rtrim($this->renderNode($node, 0));
@@ -115,7 +118,7 @@ final class MarkdownExporter implements ExporterInterface
     {
         $url = $node->getUrl() ?? (string) ($node->getData()['url'] ?? '');
 
-        return \sprintf('[%1$s](%1$s)', $url);
+        return \sprintf('[%1$s](%2$s)', $url, $this->sanitizeUrl($url));
     }
 
     private function renderText(Text $node): string
@@ -142,7 +145,7 @@ final class MarkdownExporter implements ExporterInterface
             $mark instanceof Code => "`{$text}`",
             $mark instanceof Strike => "~~{$text}~~",
             $mark instanceof Underline => "<u>{$text}</u>",
-            $mark instanceof Subsup => \sprintf('<%1$s>%2$s</%1$s>', $mark->getSubsupType(), $text),
+            $mark instanceof Subsup => \sprintf('<%1$s>%2$s</%1$s>', 'sup' === $mark->getSubsupType() ? 'sup' : 'sub', $text),
             $mark instanceof TextColor => \sprintf('<span style="color:%s">%s</span>', $mark->getColor(), $text),
             $mark instanceof BackgroundColor => \sprintf('<span style="background-color:%s">%s</span>', $mark->getColor(), $text),
             $mark instanceof Link => $this->wrapLink($mark, $text),
@@ -154,7 +157,7 @@ final class MarkdownExporter implements ExporterInterface
     {
         $title = null !== $mark->getTitle() ? ' "'.$mark->getTitle().'"' : '';
 
-        return \sprintf('[%s](%s%s)', $text, $mark->getHref(), $title);
+        return \sprintf('[%s](%s%s)', $text, $this->sanitizeUrl($mark->getHref()), $title);
     }
 
     private function renderList(BlockNode $node, int $depth, bool $ordered): string

@@ -212,6 +212,55 @@ class HtmlExporterTest extends TestCase
         $this->assertSame('<p><a href="https://example.com">https://example.com</a></p>', $html);
     }
 
+    public function testSubsupTypeIsRestrictedToSubOrSup(): void
+    {
+        $html = $this->html([
+            ['type' => 'paragraph', 'content' => [
+                ['type' => 'text', 'text' => 'x', 'marks' => [['type' => 'subsup', 'attrs' => ['type' => 'img src=x onerror=alert(1)']]]],
+            ]],
+        ]);
+
+        $this->assertSame('<p><sub>x</sub></p>', $html);
+    }
+
+    public function testJavascriptSchemeInLinkHrefIsNeutralized(): void
+    {
+        $html = $this->html([
+            ['type' => 'paragraph', 'content' => [
+                ['type' => 'text', 'text' => 'link', 'marks' => [['type' => 'link', 'attrs' => ['href' => 'javascript:alert(1)']]]],
+            ]],
+        ]);
+
+        $this->assertSame('<p><a href="#">link</a></p>', $html);
+    }
+
+    public function testJavascriptSchemeInInlineCardIsNeutralized(): void
+    {
+        $html = $this->html([
+            ['type' => 'paragraph', 'content' => [
+                ['type' => 'inlineCard', 'attrs' => ['url' => 'javascript:alert(1)']],
+            ]],
+        ]);
+
+        $this->assertSame('<p><a href="#">javascript:alert(1)</a></p>', $html);
+    }
+
+    public function testSafeUrlSchemesAndRelativeUrlsArePreserved(): void
+    {
+        $html = $this->html([
+            ['type' => 'paragraph', 'content' => [
+                ['type' => 'text', 'text' => 'a', 'marks' => [['type' => 'link', 'attrs' => ['href' => 'https://example.com/p']]]],
+                ['type' => 'text', 'text' => 'b', 'marks' => [['type' => 'link', 'attrs' => ['href' => 'mailto:a@b.c']]]],
+                ['type' => 'text', 'text' => 'c', 'marks' => [['type' => 'link', 'attrs' => ['href' => '/relative/path']]]],
+            ]],
+        ]);
+
+        $this->assertSame(
+            '<p><a href="https://example.com/p">a</a><a href="mailto:a@b.c">b</a><a href="/relative/path">c</a></p>',
+            $html
+        );
+    }
+
     public function testUnsupportedNodeThrows(): void
     {
         $this->expectException(UnsupportedExportFormatException::class);

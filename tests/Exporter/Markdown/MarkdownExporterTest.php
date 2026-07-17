@@ -251,6 +251,37 @@ class MarkdownExporterTest extends TestCase
         $this->assertSame("[https://example.com](https://example.com)\n", $markdown);
     }
 
+    public function testSubsupTypeIsRestrictedToSubOrSup(): void
+    {
+        $markdown = $this->markdown([
+            ['type' => 'paragraph', 'content' => [
+                ['type' => 'text', 'text' => 'x', 'marks' => [['type' => 'subsup', 'attrs' => ['type' => 'img src=x onerror=alert(1)']]]],
+            ]],
+        ]);
+
+        $this->assertSame("<sub>x</sub>\n", $markdown);
+    }
+
+    public function testJavascriptSchemeInLinkHrefIsNeutralized(): void
+    {
+        $markdown = $this->markdown([
+            ['type' => 'paragraph', 'content' => [
+                ['type' => 'text', 'text' => 'link', 'marks' => [['type' => 'link', 'attrs' => ['href' => 'javascript:alert(1)']]]],
+            ]],
+        ]);
+
+        $this->assertSame("[link](#)\n", $markdown);
+    }
+
+    public function testJavascriptSchemeInInlineCardIsNeutralized(): void
+    {
+        $markdown = $this->markdown([
+            ['type' => 'paragraph', 'content' => [['type' => 'inlineCard', 'attrs' => ['url' => 'javascript:alert(1)']]]],
+        ]);
+
+        $this->assertSame("[javascript:alert(1)](#)\n", $markdown);
+    }
+
     public function testUnsupportedNodeThrows(): void
     {
         $this->expectException(UnsupportedExportFormatException::class);
