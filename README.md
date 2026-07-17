@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Xen3r0/adf-converter/actions/workflows/ci.yml/badge.svg)](https://github.com/Xen3r0/adf-converter/actions/workflows/ci.yml)
 [![Latest Version](https://img.shields.io/packagist/v/xen3r0/adf-converter.svg)](https://packagist.org/packages/xen3r0/adf-converter)
-[![License](https://img.shields.io/packagist/l/xen3r0/adf-converter.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/Xen3r0/adf-converter.svg)](LICENSE)
 [![PHP Version](https://img.shields.io/packagist/dependency-v/xen3r0/adf-converter/php.svg)](composer.json)
 
 A PHP toolkit to parse the [Atlassian Document Format (ADF)][adf] — the rich-text
